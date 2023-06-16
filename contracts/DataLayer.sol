@@ -5,7 +5,7 @@ contract DataLayer is AccessControl {
     address router;
     mapping(address => User) userToAddress;
     constructor(){
-        grantRole(DEFAULT_ADMIN_ROLE , msg.sender);
+        _setupRole(DEFAULT_ADMIN_ROLE , msg.sender);
     }
 
     modifier isRouter(){
@@ -22,7 +22,7 @@ contract DataLayer is AccessControl {
         bool isBlocked;
 
     }
-    function changeRouter(address _router) external {
+    function changeRouter(address _router) external isRouter{
         require(hasRole(DEFAULT_ADMIN_ROLE , msg.sender) , "You are not the owner");
         router = _router;
     }
@@ -32,9 +32,19 @@ contract DataLayer is AccessControl {
         userToAddress[tx.origin] = User(tx.origin , phoneNumber ,  name ,  imeiNumber ,  aadharCardNumber , false);
     }
 
-    function viewData(address userAddress) external view isRouter returns(User memory){
-        return userToAddress[userAddress];
+    function viewData(address userAddress) external view isRouter returns(address  , uint , string memory , string memory , uint  , bool){
+        User memory user = userToAddress[userAddress];
+        return (user.userAddress , user.phoneNumber , user.name , user.imeiNumber , user.aadharCardNumber , user.isBlocked);
     }
+
+    function blockUser(address _userAddress) external isRouter {
+        userToAddress[_userAddress].isBlocked = true;
+    }
+
+    function isUserBlocked(address _userAddress) external view isRouter returns(bool){
+        return userToAddress[_userAddress].isBlocked;
+    }
+
 
     
 

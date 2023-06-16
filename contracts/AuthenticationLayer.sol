@@ -1,20 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 import "@openzeppelin/contracts/access/AccessControl.sol";
-
-interface IDataLayer{
-    function viewData(address) external view returns(string memory);
-    function sendTransaction() external ;
-}
+import './DataLayer.sol';
 contract AuthenticationLayer is AccessControl{
     bytes32 public constant USER_ROLE = keccak256("USER");
     bytes32 public constant MINER_ROLE = keccak256("MINER");
-    IDataLayer dataLayer;
+
+    DataLayer dataLayer;
     constructor (address _dataLayer)  {
-    grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    grantRole(MINER_ROLE , msg.sender);
-    grantRole(USER_ROLE , msg.sender);
-    dataLayer = IDataLayer(_dataLayer);
+    _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    _setupRole(MINER_ROLE , msg.sender);
+    _setupRole(USER_ROLE , msg.sender);
+    dataLayer = DataLayer(_dataLayer);
     }
 
     modifier isOwner(){
@@ -43,10 +40,19 @@ contract AuthenticationLayer is AccessControl{
 
     }
 
-    function viewData() hasViewRole public  {
+    function viewData() hasViewRole public view returns(address  , uint , string memory , string memory , uint  , bool) {
+        return dataLayer.viewData(msg.sender);
     }
 
-    function addUser() canAddUser public  {
+    function addUser(uint phoneNumber , string calldata name , string calldata imeiNumber , uint aadharCardNumber ) isMiner external  {
+        dataLayer.addUser( phoneNumber ,  name ,  imeiNumber ,  aadharCardNumber );
+    }
 
+    function blockUser(address _user) external isMiner{
+        dataLayer.blockUser(_user);
+    }
+
+    function changeRouter(address newRouter) external isOwner{
+        dataLayer.changeRouter(newRouter);
     }
 }
