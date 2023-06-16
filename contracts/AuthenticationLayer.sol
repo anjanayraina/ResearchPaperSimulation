@@ -6,6 +6,8 @@ contract AuthenticationLayer is AccessControl{
     bytes32 public constant MINER_ROLE = keccak256("MINER");
     constructor ()  {
     grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    grantRole(MINER_ROLE , msg.sender);
+    grantRole(USER_ROLE , msg.sender);
     }
 
     modifier isOwner(){
@@ -26,6 +28,12 @@ contract AuthenticationLayer is AccessControl{
     modifier hasViewRole(){
         require(hasRole(USER_ROLE , msg.sender) || hasRole(MINER_ROLE , msg.sender) || hasRole(DEFAULT_ADMIN_ROLE , msg.sender) , "You dont have the required role");
         _;
+    }
+
+    modifier sendTransaction(){
+        require(hasRole(MINER_ROLE , msg.sender) , "You dont have the required role");
+        _;
+        
     }
 
     function viewData() hasViewRole public  {
