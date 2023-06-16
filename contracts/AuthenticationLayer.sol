@@ -4,8 +4,8 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 contract AuthenticationLayer is AccessControl{
     bytes32 public constant USER_ROLE = keccak256("USER");
     bytes32 public constant MINER_ROLE = keccak256("MINER");
-    constructor (address root)  {
-    _setupRole(DEFAULT_ADMIN_ROLE, root);
+    constructor ()  {
+    grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     modifier isOwner(){
@@ -22,4 +22,12 @@ contract AuthenticationLayer is AccessControl{
         require(hasRole(USER_ROLE , msg.sender)  , "You dont have the required role");
         _;
     } 
+
+    modifier hasViewRole(){
+        require(hasRole(USER_ROLE , msg.sender) || hasRole(MINER_ROLE , msg.sender) || hasRole(DEFAULT_ADMIN_ROLE , msg.sender) , "You dont have the required role");
+        _;
+    }
+
+    function viewData() hasViewRole public  {
+    }
 }
