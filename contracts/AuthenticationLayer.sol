@@ -1,13 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 import "@openzeppelin/contracts/access/AccessControl.sol";
+
+interface IDataLayer{
+    function viewData(address) external view returns(string memory);
+    function sendTransaction() external ;
+}
 contract AuthenticationLayer is AccessControl{
     bytes32 public constant USER_ROLE = keccak256("USER");
     bytes32 public constant MINER_ROLE = keccak256("MINER");
-    constructor ()  {
+    IDataLayer dataLayer;
+    constructor (address _dataLayer)  {
     grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     grantRole(MINER_ROLE , msg.sender);
     grantRole(USER_ROLE , msg.sender);
+    dataLayer = IDataLayer(_dataLayer);
     }
 
     modifier isOwner(){
@@ -30,12 +37,16 @@ contract AuthenticationLayer is AccessControl{
         _;
     }
 
-    modifier sendTransaction(){
+    modifier canAddUser(){
         require(hasRole(MINER_ROLE , msg.sender) , "You dont have the required role");
         _;
-        
+
     }
 
     function viewData() hasViewRole public  {
+    }
+
+    function addUser() canAddUser public  {
+
     }
 }
